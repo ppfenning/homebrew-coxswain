@@ -10,12 +10,12 @@ cox setup doctor
 
 ## Status
 
-**Not installable yet.** The formula targets `0.2.0`, which is not published. Its
-`sha256` is a zero digest on purpose: a premature install fails on the checksum
-rather than fetching something unverified. Two lines change when 0.2.0 ships — the
-`url` and the `sha256` — and `cox dev release` fills them after the PyPI publish.
+Installable. The formula tracks the latest `coxswain-tools` release on PyPI. After each
+publish, the umbrella's release tooling (`python -m devtools release`, run from the
+coxswain checkout) opens a pull request here that moves the formula's `url` and
+`sha256` to the new sdist.
 
-Until then, on any platform:
+On any platform, without Homebrew:
 
 ```sh
 uv tool install coxswain-tools

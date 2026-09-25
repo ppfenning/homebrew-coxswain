@@ -1,10 +1,8 @@
 # Coxswain's operator CLI. `cox setup doctor` tells a fresh machine what it is missing.
 #
-# The url and sha256 below are filled by `cox dev release` after the PyPI publish
-# succeeds; until 0.2.0 is published this formula does not install. The sha256 is
-# deliberately the empty-string digest rather than a plausible-looking constant, so
-# a premature `brew install` fails loudly on the checksum instead of fetching
-# something nobody verified.
+# The url and sha256 below are moved to each new PyPI sdist by the umbrella's release
+# tooling (`python -m devtools release`), in a pull request opened after the publish
+# succeeds.
 class Cox < Formula
   include Language::Python::Virtualenv
 

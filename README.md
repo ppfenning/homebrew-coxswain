@@ -4,7 +4,9 @@ The Homebrew tap for [Coxswain](https://ppfenning.github.io/coxswain/latest/) â€
 `cox` command on macOS.
 
 ```sh
-brew install ppfenning/coxswain/cox
+brew tap ppfenning/coxswain
+brew trust ppfenning/coxswain   # once: current Homebrew refuses untrusted third-party taps
+brew install cox
 cox setup doctor
 ```
 

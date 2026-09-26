@@ -8,8 +8,8 @@ class Cox < Formula
 
   desc "Operator CLI for Coxswain: run records, traces, landing, and the live screens"
   homepage "https://ppfenning.github.io/coxswain/latest/"
-  url "https://files.pythonhosted.org/packages/3e/c1/6873583ede0740867401a43967b1bd9372b30d438d342840ea4b0f3127a7/coxswain_tools-0.16.0.tar.gz"
-  sha256 "90f4e17389569f67ac3b5f63cddb1969975cc35e3ee250ed927359385ba622c6"
+  url "https://files.pythonhosted.org/packages/b2/e0/9194a791d53fd34351848731e8f62bdcedeb733bdc50d1e1a6d2d0a8fdaf/coxswain_tools-0.17.0.tar.gz"
+  sha256 "a43b4da94c35a4bcb6dab1cd961daa3fbb3a81c4f4c3d1bf0e2e809fb9005f6c"
   license "MIT"
   head "https://github.com/ppfenning/coxswain-tools.git", branch: "main"
 
@@ -18,6 +18,11 @@ class Cox < Formula
   resource "pyyaml" do
     url "https://files.pythonhosted.org/packages/05/8e/961c0007c59b8dd7729d542c61a4d537767a59645b82a0b521206e1e25c2/pyyaml-6.0.3.tar.gz"
     sha256 "d76623373421df22fb4cf8817020cbb7ef15c725b9d5e45f17e189bfc384190f"
+  end
+
+  resource "zstandard" do
+    url "https://files.pythonhosted.org/packages/fd/aa/3e0508d5a5dd96529cdc5a97011299056e14c6505b678fd58938792794b1/zstandard-0.25.0.tar.gz"
+    sha256 "7713e1179d162cf5c7906da876ec2ccb9c3a9dcbdffef0cc7f70c3667a205f0b"
   end
 
   def install

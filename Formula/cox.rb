@@ -8,8 +8,8 @@ class Cox < Formula
 
   desc "Operator CLI for Coxswain: run records, traces, landing, and the live screens"
   homepage "https://ppfenning.github.io/coxswain/latest/"
-  url "https://files.pythonhosted.org/packages/8c/7e/71b8caa3fabe778bc32a90e2cb4982a5b7309dffaf54905618d1b1fd4ca6/coxswain_tools-0.33.0.tar.gz"
-  sha256 "55c6b975d03fabd5c28b67bae33a1339bb48e9dc67798cf63430f9d1add519be"
+  url "https://files.pythonhosted.org/packages/6e/a1/0bedc6cce252e7fa0f9a5252e0e41715bdc555e2aa7c06e24664611b2fe2/coxswain_tools-0.34.0.tar.gz"
+  sha256 "8a9e22e62f78d063e40d7f0d6254971261de3ebbca638ab4dcb3742b867e4064"
   license "MIT"
   head "https://github.com/ppfenning/coxswain-tools.git", branch: "main"
 

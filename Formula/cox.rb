@@ -8,8 +8,8 @@ class Cox < Formula
 
   desc "Operator CLI for Coxswain: run records, traces, landing, and the live screens"
   homepage "https://ppfenning.github.io/coxswain/latest/"
-  url "https://files.pythonhosted.org/packages/e1/ea/9e697d81338b3eb1e41e3dd6e6e0ba15f8de4b288869bc8b2ad6a118ae1d/coxswain_tools-0.35.0.tar.gz"
-  sha256 "d8fd8310abb760590cfd3b1fb07f28ae07cd4a75706507b3d75ac89aa485d0b9"
+  url "https://files.pythonhosted.org/packages/b8/1c/b6eee0e017b56636d3fd0e0c2f4360e9ee15c4720cee0d6f30293f049300/coxswain_tools-0.36.0.tar.gz"
+  sha256 "db0481f8fcd0b77b82fd3a59e48a7fb508822aacd542ae7341d394cefdddaa6d"
   license "MIT"
   head "https://github.com/ppfenning/coxswain-tools.git", branch: "main"
 
@@ -25,8 +25,31 @@ class Cox < Formula
     sha256 "7713e1179d162cf5c7906da876ec2ccb9c3a9dcbdffef0cc7f70c3667a205f0b"
   end
 
+  on_macos do
+    on_arm do
+      resource "towpath" do
+        url "https://github.com/ppfenning/coxswain-dash/releases/download/v0.36.0/towpath-v0.36.0-aarch64-apple-darwin.tar.gz"
+        sha256 "ddd25df78eabe36e6ca61dfe95fbba7ab20794fdf8b1cd8083ed9512bd94f70d"
+      end
+    end
+  end
+
+  on_linux do
+    on_intel do
+      resource "towpath" do
+        url "https://github.com/ppfenning/coxswain-dash/releases/download/v0.36.0/towpath-v0.36.0-x86_64-unknown-linux-gnu.tar.gz"
+        sha256 "f0f8876134f36a2a1aba8b93e8fda3f1301a9b202e2fdac7f61a5d8215e5d877"
+      end
+    end
+  end
+
   def install
-    virtualenv_install_with_resources
+    if resources.map(&:name).include?("towpath")
+      resource("towpath").stage do
+        bin.install "towpath", "coxtop"
+      end
+    end
+    virtualenv_install_with_resources without: resources.map(&:name) & ["towpath"]
   end
 
   def caveats
@@ -41,6 +64,7 @@ class Cox < Formula
   end
 
   test do
+    system bin/"towpath", "--version" if (bin/"towpath").exist?
     assert_match "cox", shell_output("#{bin}/cox --help")
     system bin/"cox", "setup", "doctor"
   end

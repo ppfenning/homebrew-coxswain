@@ -8,8 +8,8 @@ class Cox < Formula
 
   desc "Operator CLI for Coxswain: run records, traces, landing, and the live screens"
   homepage "https://ppfenning.github.io/coxswain/latest/"
-  url "https://files.pythonhosted.org/packages/e7/61/a38421254d6342dbef8591f2e612e1301d3f233a1b582f0826ebd0ceb4e3/coxswain_tools-0.40.0.tar.gz"
-  sha256 "fac8c90900ee34ac2dd3c771f187fc39659eaaf2fd959ac2a5733c9ba12d67d6"
+  url "https://files.pythonhosted.org/packages/9f/83/3198012ca359d09dd87404a9d128043c5cfadc8529a1cce3f1bc58a7f537/coxswain_tools-0.41.0.tar.gz"
+  sha256 "339db8fb1735daf4ded6fbbb975a5419c8e20b9cdf11ec138c3713d97fd5ed06"
   license "MIT"
   head "https://github.com/ppfenning/coxswain-tools.git", branch: "main"
 
@@ -28,8 +28,8 @@ class Cox < Formula
   on_macos do
     on_arm do
       resource "towpath" do
-        url "https://github.com/ppfenning/coxswain-dash/releases/download/v0.40.0/towpath-v0.40.0-aarch64-apple-darwin.tar.gz"
-        sha256 "1cba9a42a27ca503bfd4eb149a8d5485391a92e75701a5e0157b4d5fe5a91357"
+        url "https://github.com/ppfenning/coxswain-dash/releases/download/v0.41.0/towpath-v0.41.0-aarch64-apple-darwin.tar.gz"
+        sha256 "d656b3b1171b2aede7b6413ba696d5758054694225d0afe2a1be00590f37ae49"
       end
     end
   end
@@ -37,8 +37,8 @@ class Cox < Formula
   on_linux do
     on_intel do
       resource "towpath" do
-        url "https://github.com/ppfenning/coxswain-dash/releases/download/v0.40.0/towpath-v0.40.0-x86_64-unknown-linux-gnu.tar.gz"
-        sha256 "e249d87a91e43a41f17371ea242c7cc488fe557833955216d15d0c495ccac70e"
+        url "https://github.com/ppfenning/coxswain-dash/releases/download/v0.41.0/towpath-v0.41.0-x86_64-unknown-linux-gnu.tar.gz"
+        sha256 "b9a55ff6a51c5861c83d6f6e03a4b22f6147f64cd140ed0ed8f91363c74f4204"
       end
     end
   end

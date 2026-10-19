@@ -54,12 +54,13 @@ class Cox < Formula
 
   def caveats
     <<~EOS
-      `cox` alone is the CLI. The rest of a Coxswain install — cartridges, graphs,
-      crew, the HUD — are git checkouts this command fetches:
+      `cox` alone is the CLI. The rest of a Coxswain install is one checkout of the
+      coxswain repository (and coxswain-dash with `--with dash`), which this command fetches:
 
         cox setup doctor    # what this machine is missing
-        cox install         # every component from the manifest, at the pinned tags
+        cox install         # the coxswain checkout at this release
 
+      Coming from 0.47? Run `cox setup migrate`, then `cox setup migrate --apply`.
     EOS
   end
 

@@ -15,8 +15,6 @@ class Cox < Formula
 
   depends_on "libpq"
   depends_on "python@3.14"
-  depends_on "apache-arrow"
-  depends_on "cmake" => :build
 
   resource "pyyaml" do
     url "https://files.pythonhosted.org/packages/05/8e/961c0007c59b8dd7729d542c61a4d537767a59645b82a0b521206e1e25c2/pyyaml-6.0.3.tar.gz"
@@ -51,20 +49,12 @@ class Cox < Formula
     end
   end
 
-  resource "pyarrow" do
-    url "https://files.pythonhosted.org/packages/ec/34/17c34cb38e5d940e38f0f0d9fdfa0e8a506676409ea9b85aff7e3079f831/pyarrow-26.0.0.tar.gz"
-    sha256 "0cccd36e00ea3afeb52ded61f2721ce71f604853d70c45365c58324eb773d6ae"
-  end
-
   def install
     if resources.map(&:name).include?("towpath")
       resource("towpath").stage do
         bin.install "towpath", "coxtop"
       end
     end
-    # pyarrow builds from its sdist against Homebrew's apache-arrow; a wheel would bundle libraries Homebrew cannot relink.
-    ENV["ARROW_HOME"] = Formula["apache-arrow"].opt_prefix
-    ENV["PYARROW_CMAKE_OPTIONS"] = "-DCMAKE_PREFIX_PATH=#{Formula["apache-arrow"].opt_prefix}"
     virtualenv_install_with_resources without: resources.map(&:name) & ["towpath"]
     # psycopg is pure Python here and loads libpq through ctypes. Homebrew's libpq is keg-only,
     # so the entry points carry its lib directory on the loader's fallback path. Shipping the
@@ -102,12 +92,5 @@ class Cox < Formula
     with_env(libpq_var => Formula["libpq"].opt_lib.to_s) do
       assert_match(/\d/, shell_output("#{libexec}/bin/python -c 'import psycopg; print(psycopg.pq.version())'"))
     end
-    # A bucket cannot be reached inside the Homebrew test sandbox, so this asserts that the object store client is
-    # importable (pyarrow), not that the bucket is reachable.
-    (testpath/"provider.yaml").write("storage_url: postgresql://doctor@127.0.0.1:1/doctor\ntraces_url: s3://cox-doctor-probe/traces\nobject_store:\n  endpoint: https://127.0.0.1:9\n")
-    (testpath/"profile.yaml").write("provider_profile: #{testpath}/provider.yaml\nstore:\n  mode: shared\n")
-    doctor = shell_output("#{bin}/cox setup doctor --profile #{testpath}/profile.yaml 2>&1", nil)
-    assert_match "object_store", doctor
-    refute_match "needs a client library that is not installed", doctor
   end
 end

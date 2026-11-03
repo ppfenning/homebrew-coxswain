@@ -8,11 +8,12 @@ class Cox < Formula
 
   desc "Operator CLI for Coxswain: run records, traces, landing, and the live screens"
   homepage "https://ppfenning.github.io/coxswain/latest/"
-  url "https://files.pythonhosted.org/packages/19/f1/150464867ce6ed948aaf373bf570e3d6ca9b0a438d876b7c34379ba27a62/coxswain-2026.11.0.tar.gz"
-  sha256 "77264c1c8b95d178330d1860e105f821909291fdad5f3b4731c1f4e10eb020dc"
+  url "https://files.pythonhosted.org/packages/4e/62/6cf5de6abe14fbb75bcc87b70f5de75458d3496f3b93f0b60610d4fc6eb3/coxswain-2026.11.1.tar.gz"
+  sha256 "838a47e191ec65e428be45428736fa0a6a773086cb76f06f15d96da2983bf9e7"
   license "MIT"
   head "https://github.com/ppfenning/coxswain.git", branch: "main"
 
+  depends_on "libpq"
   depends_on "python@3.14"
 
   resource "pyyaml" do
@@ -25,11 +26,16 @@ class Cox < Formula
     sha256 "7713e1179d162cf5c7906da876ec2ccb9c3a9dcbdffef0cc7f70c3667a205f0b"
   end
 
+  resource "psycopg" do
+    url "https://files.pythonhosted.org/packages/76/26/3ea4ca5eaea1c0debcdf7ee7c1613fbe721dc27a03c461c0817ffd8a0601/psycopg-3.3.6.tar.gz"
+    sha256 "c081f2250df751a943036e42db6df4571c66cd0aabe8291a7a506512b12007d2"
+  end
+
   on_macos do
     on_arm do
       resource "towpath" do
-        url "https://github.com/ppfenning/coxswain-dash/releases/download/v2026.11.0/towpath-v2026.11.0-aarch64-apple-darwin.tar.gz"
-        sha256 "f7ece31f18e55be1f338c5d9e0677577c38e9113d48ddca3800a9d6300a8c8b9"
+        url "https://github.com/ppfenning/coxswain-dash/releases/download/v2026.11.1/towpath-v2026.11.1-aarch64-apple-darwin.tar.gz"
+        sha256 "e551b3b1d7407c97565773d3259d3a709c7a70225f3f883a98ca50ea7c687607"
       end
     end
   end
@@ -37,8 +43,8 @@ class Cox < Formula
   on_linux do
     on_intel do
       resource "towpath" do
-        url "https://github.com/ppfenning/coxswain-dash/releases/download/v2026.11.0/towpath-v2026.11.0-x86_64-unknown-linux-gnu.tar.gz"
-        sha256 "f05b88a27ee2473b12709cfb9b9c1c9e55995cc3be71e5e0b2437d09188f5652"
+        url "https://github.com/ppfenning/coxswain-dash/releases/download/v2026.11.1/towpath-v2026.11.1-x86_64-unknown-linux-gnu.tar.gz"
+        sha256 "67d0e31bcf805ebe812bea91cc705c8e0314201df677b5545073f0e2440925a2"
       end
     end
   end
@@ -50,6 +56,20 @@ class Cox < Formula
       end
     end
     virtualenv_install_with_resources without: resources.map(&:name) & ["towpath"]
+    # psycopg is pure Python here and loads libpq through ctypes. Homebrew's libpq is keg-only,
+    # so the entry points carry its lib directory on the loader's fallback path. Shipping the
+    # psycopg-binary wheel instead fails: its bundled dylibs cannot be relinked by Homebrew.
+    libpq_env = if OS.mac?
+      { DYLD_FALLBACK_LIBRARY_PATH: Formula["libpq"].opt_lib }
+    else
+      { LD_LIBRARY_PATH: Formula["libpq"].opt_lib }
+    end
+    %w[cox agent-tools cartridge].each do |name|
+      next unless (libexec/"bin"/name).exist?
+
+      rm bin/name if (bin/name).exist? || (bin/name).symlink?
+      (bin/name).write_env_script libexec/"bin"/name, libpq_env
+    end
   end
 
   def caveats
@@ -68,5 +88,9 @@ class Cox < Formula
     system bin/"towpath", "--version" if (bin/"towpath").exist?
     assert_match "cox", shell_output("#{bin}/cox --help")
     system bin/"cox", "setup", "doctor"
+    libpq_var = OS.mac? ? "DYLD_FALLBACK_LIBRARY_PATH" : "LD_LIBRARY_PATH"
+    with_env(libpq_var => Formula["libpq"].opt_lib.to_s) do
+      assert_match(/\d/, shell_output("#{libexec}/bin/python -c 'import psycopg; print(psycopg.pq.version())'"))
+    end
   end
 end

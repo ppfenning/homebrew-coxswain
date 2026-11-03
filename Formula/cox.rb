@@ -13,6 +13,7 @@ class Cox < Formula
   license "MIT"
   head "https://github.com/ppfenning/coxswain.git", branch: "main"
 
+  depends_on "libpq"
   depends_on "python@3.14"
 
   resource "pyyaml" do
@@ -28,24 +29,6 @@ class Cox < Formula
   resource "psycopg" do
     url "https://files.pythonhosted.org/packages/76/26/3ea4ca5eaea1c0debcdf7ee7c1613fbe721dc27a03c461c0817ffd8a0601/psycopg-3.3.6.tar.gz"
     sha256 "c081f2250df751a943036e42db6df4571c66cd0aabe8291a7a506512b12007d2"
-  end
-
-  on_macos do
-    on_arm do
-      resource "psycopg-binary" do
-        url "https://files.pythonhosted.org/packages/63/da/28befc84454cbc6374550de7746f591f8fe1b6165c1fce249652cc8291c4/psycopg_binary-3.3.6-cp314-cp314-macosx_11_0_arm64.whl", using: :nounzip
-        sha256 "5927b7ba63153cd8e9862987290a2b783a5c590daf2a4ef981700cc3569166d4"
-      end
-    end
-  end
-
-  on_linux do
-    on_intel do
-      resource "psycopg-binary" do
-        url "https://files.pythonhosted.org/packages/49/6d/7692d0d4e656b6cc9868d8acc2e3b42f17a0db4a625400a6d093cb0533a1/psycopg_binary-3.3.6-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", using: :nounzip
-        sha256 "31cd942c23f613276b81a6e6598cefa12960058b0f46e1e874b540c793f6aca5"
-      end
-    end
   end
 
   on_macos do
@@ -72,12 +55,20 @@ class Cox < Formula
         bin.install "towpath", "coxtop"
       end
     end
-    virtualenv_install_with_resources without: resources.map(&:name) & ["towpath", "psycopg-binary"]
-    if resources.map(&:name).include?("psycopg-binary")
-      resource("psycopg-binary").stage do
-        system Formula["python@3.14"].opt_bin/"python3.14", "-m", "pip", "--python=#{libexec}/bin/python",
-               "install", "--no-deps", "--no-index", Dir["*.whl"].first
-      end
+    virtualenv_install_with_resources without: resources.map(&:name) & ["towpath"]
+    # psycopg is pure Python here and loads libpq through ctypes. Homebrew's libpq is keg-only,
+    # so the entry points carry its lib directory on the loader's fallback path. Shipping the
+    # psycopg-binary wheel instead fails: its bundled dylibs cannot be relinked by Homebrew.
+    libpq_env = if OS.mac?
+      { DYLD_FALLBACK_LIBRARY_PATH: Formula["libpq"].opt_lib }
+    else
+      { LD_LIBRARY_PATH: Formula["libpq"].opt_lib }
+    end
+    %w[cox agent-tools cartridge].each do |name|
+      next unless (libexec/"bin"/name).exist?
+
+      rm bin/name if (bin/name).exist? || (bin/name).symlink?
+      (bin/name).write_env_script libexec/"bin"/name, libpq_env
     end
   end
 
@@ -97,5 +88,9 @@ class Cox < Formula
     system bin/"towpath", "--version" if (bin/"towpath").exist?
     assert_match "cox", shell_output("#{bin}/cox --help")
     system bin/"cox", "setup", "doctor"
+    libpq_var = OS.mac? ? "DYLD_FALLBACK_LIBRARY_PATH" : "LD_LIBRARY_PATH"
+    with_env(libpq_var => Formula["libpq"].opt_lib.to_s) do
+      assert_match(/\d/, shell_output("#{libexec}/bin/python -c 'import psycopg; print(psycopg.pq.version())'"))
+    end
   end
 end
